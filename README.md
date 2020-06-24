@@ -20,7 +20,7 @@ Install dependencies
 
       pacman -Syu jpegoptim pngquant parallel
 
-Now you can run it with
+Run it with
 
     compressimages [options] [files] [directories]
     -0            use NUL as delimiter for stdin rather than newline
