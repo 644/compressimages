@@ -2,25 +2,25 @@
 Bash script for bulk optimizing PNG/JPG files. It uses lossy compression, with barely noticeable differences except for filesize. Similar to tinypng.com.
 
 ## Installation & Usage
-* Download and give file executable permissions for user
+Download and give file executable permissions for user
 
-      wget https://raw.githubusercontent.com/644/compressimages/master/compressimages && chmod u+x compressimages
+    wget https://raw.githubusercontent.com/644/compressimages/master/compressimages && chmod u+x compressimages
 
-* Copy to $PATH
+Copy to $PATH
     
-      sudo cp compressimages /usr/local/bin/
+    sudo cp compressimages /usr/local/bin/
 
-* Install dependencies
+Install dependencies
 
-  * Ubuntu
+* Ubuntu
     
-        apt install -y jpegoptim pngquant parallel
+      apt install -y jpegoptim pngquant parallel
     
-  * Arch Linux
+* Arch Linux
 
-        pacman -Syu jpegoptim pngquant parallel
+      pacman -Syu jpegoptim pngquant parallel
 
-That's it! Now you can run it with
+Now you can run it with
 
     compressimages [options] [files] [directories]
     -0            use NUL as delimiter for stdin rather than newline
