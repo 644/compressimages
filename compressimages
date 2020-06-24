@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Depends on GNU parallel, pngquant, jpegoptim, and bash >= 4.0+
 # Takes files and directories from stdin, and arguments to the script
+case "${BASH_VERSION}" in ''|[123].*) printf 'Bash >= 4.0+ required' >&2; exit 1; ;; esac
+
 declare -a dirlist imglist pnglist jpglist depth
 declare -a hidden=(\( ! -regex '.*/\..*' \))
 declare -i threads=16
