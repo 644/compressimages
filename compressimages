@@ -12,7 +12,7 @@ declare line d i
 
 _info() {
 	cat <<-EOF
-		    ./${0##*/} [options] [files] [directories]
+		./${0##*/} [options] [files] [directories]
 		    -0            use NUL as delimiter for stdin rather than newline
 		    -nh           don't ignore directories starting with . or ..
 		    -p PATH       path for compressed images
