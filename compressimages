@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# Depends on GNU parallel, pngquant, jpegoptim, and bash >= 4.0+
+# Takes files and directories from stdin, and arguments to the script
+declare -a dirlist imglist pnglist jpglist depth
+declare -a hidden=(\( ! -regex '.*/\..*' \))
+declare -i threads=16
+declare opath="${HOME}/compressed/"
+declare delim=$'\n'
+declare line d i
+
+_info() {
+	cat <<-EOF
+		    ./${0##*/} [options] [files] [directories]
+		    -0            use NUL as delimiter for stdin rather than newline
+		    -nh           don't ignore directories starting with . or ..
+		    -p PATH       path for compressed images
+		    -t INT        threads to use (default: 16)
+		    -depth INT    limit find's maxdepth to INT
+	EOF
+	exit 0
+}
+
+while(($# > 0)); do
+	case ${1} in
+		-depth) shift; depth=(-maxdepth "${1}") ;;
+		-p) shift; opath=${1} ;;
+		-t) shift; threads=${1} ;;
+		-nh) hidden=() ;;
+		-0) delim= ;;
+		-h) _info; ;;
+		*) [[ -f ${1} ]] && imglist+=("${1}"); [[ -d ${1} ]] && dirlist+=("${1}") ;;
+	esac
+	shift
+done
+
+while [[ ! -t 0 ]] && read -r -d "${delim}" line; do
+	[[ -f ${line} ]] && imglist+=("${line}");
+	[[ -d ${line} ]] && dirlist+=("${line}");
+done
+
+((${#dirlist[@]} + ${#imglist[@]} > 0)) || dirlist=(./)
+
+for d in "${dirlist[@]}"; do
+	mapfile -t -d '' pnglist < <(find "${d}" "${depth[@]}" "${hidden[@]}" -type f -iname '*.png' -printf '%p\0')
+	mapfile -t -d '' jpglist < <(find "${d}" "${depth[@]}" "${hidden[@]}" -type f \( -iname '*.jpg' -o -iname '*.jpeg' \) -printf '%p\0')
+done
+
+for i in "${imglist[@]}"; do
+	case ${i} in *.png) pnglist+=("${i}") ;; *.jpg|*.jpeg) jpglist+=("${i}") ;; *) continue; ;; esac
+done
+
+((${#pnglist[@]} + ${#jpglist[@]} > 0)) || exit 1
+
+mkdir -p "${opath}"
+[[ -d ${opath} ]] || exit 1
+[[ ${opath: -1} == '/' ]] || opath=${opath}/
+
+((${#pnglist[@]} > 0)) && { printf '%s\0' "${pnglist[@]}" | parallel -0 -j"${threads}" --bar --plus "pngquant --speed 1 -f -o ${opath}{/} {} 2>/dev/null"; }
+((${#jpglist[@]} > 0)) && { printf '%s\0' "${jpglist[@]}" | parallel -0 -j"${threads}" --bar "jpegoptim -q -o -s -m 80 -d ${opath} {} 2>/dev/null"; }
+
+exit 0
