@@ -1,29 +1,35 @@
-# Description
+## Description
 Bash script for bulk optimizing PNG/JPG files. It uses lossy compression, with barely noticeable differences except for filesize. Similar to tinypng.com.
 
-# Installation
-    wget https://raw.githubusercontent.com/644/compressimages/master/compressimages && chmod u+x compressimages
-    sudo cp compressimages /usr/local/bin/
+## Installation & Usage
+* Download and give file executable permissions for user
 
-Install dependencies
+      wget https://raw.githubusercontent.com/644/compressimages/master/compressimages && chmod u+x compressimages
 
-* Ubuntu
+* Copy to $PATH
     
-      apt install -y jpegoptim pngquant parallel
+      sudo cp compressimages /usr/local/bin/
+
+* Install dependencies
+
+  * Ubuntu
     
-* Arch
+        apt install -y jpegoptim pngquant parallel
+    
+  * Arch Linux
 
-      pacman -Syu jpegoptim pngquant parallel
+        pacman -Syu jpegoptim pngquant parallel
 
-# Usage
-    ./compressimages [options] [files] [directories]
+That's it! Now you can run it with
+
+    compressimages [options] [files] [directories]
     -0            use NUL as delimiter for stdin rather than newline
     -nh           don't ignore directories starting with . or ..
     -p PATH       path for compressed images
     -t INT        threads to use (default: 16)
     -depth INT    limit find's maxdepth to INT
 
-# Examples
+## Examples
     find . -type f -name '*.png' -print0 | compressimages -0 -p output/
 
 It can detect whether it's a directory or file
@@ -36,5 +42,8 @@ It's a good idea to [add the script to your PATH](https://askubuntu.com/question
 For directories it will scan them for more images.
 For files it will check they are PNG/JPG before continuing to optimize them.
 
-# Dependencies
+## Dependencies
 parallel, jpegoptim, pngquant, bash >= 4.0+
+
+## License
+MIT
