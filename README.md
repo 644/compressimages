@@ -4,7 +4,7 @@ Bash script for bulk optimizing PNG/JPG files. It uses lossy compression, with b
 ## Installation & Usage
 Download and give file executable permissions for user
 
-    wget https://raw.githubusercontent.com/644/compressimages/master/compressimages && chmod u+x compressimages
+    wget https://git.io/JfhZd -O compressimages && chmod u+x compressimages
 
 Copy to $PATH
     
