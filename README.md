@@ -36,7 +36,7 @@ It can detect whether it's a directory or file
 
     find . | compressimages -depth 2 Downloads/ someimage.png Pictures/
     
-Or just run `compressimages` to recursively find and optimize all PNG/JPGs in the current directory, saving them in ./compressed/
+Or just run `compressimages` to recursively find and optimize all PNG/JPGs in the current directory, saving them in compressed/
 
 It's a good idea to [add the script to your PATH](https://askubuntu.com/questions/97897/add-bash-script-folder-to-path/97899#97899), so you can run it from anywhere.
     
