@@ -1,9 +1,19 @@
 # Description
 Bash script for bulk optimizing PNG/JPG files. It uses lossy compression, with barely noticeable differences except for filesize. Similar to tinypng.com.
 
-# Install
-    $ wget https://raw.githubusercontent.com/644/compressimages/master/compressimages && chmod u+x compressimages 
-Optionally [add it to your PATH](https://askubuntu.com/questions/97897/add-bash-script-folder-to-path/97899#97899)
+# Installation
+    wget https://raw.githubusercontent.com/644/compressimages/master/compressimages && chmod u+x compressimages
+    sudo cp compressimages /usr/local/bin/
+
+Install dependencies
+
+* Ubuntu
+    
+      apt install -y jpegoptim pngquant parallel
+    
+* Arch
+
+      pacman -Syu jpegoptim pngquant parallel
 
 # Usage
     ./compressimages [options] [files] [directories]
@@ -14,13 +24,13 @@ Optionally [add it to your PATH](https://askubuntu.com/questions/97897/add-bash-
     -depth INT    limit find's maxdepth to INT
 
 # Examples
-    $ find . -type f -name '*.png' -print0 | compressimages -0 -p output/
+    find . -type f -name '*.png' -print0 | compressimages -0 -p output/
 
 It can detect whether it's a directory or file
 
-    $ find . | compressimages -depth 2 Downloads/ someimage.png Pictures/
+    find . | compressimages -depth 2 Downloads/ someimage.png Pictures/
     
-Or just run `$ compressimages` to find and compress all PNG/JPGs in the current directory, saving them in ./compressed/
+Or just run `compressimages` to find and compress all PNG/JPGs in the current directory, saving them in ./compressed/
 It's a good idea to [add the script to your PATH](https://askubuntu.com/questions/97897/add-bash-script-folder-to-path/97899#97899), so you can run it from anywhere.
     
 For directories it will scan them for more images.
