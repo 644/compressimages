@@ -9,6 +9,8 @@ declare -i threads=16
 declare opath="${HOME}/compressed/"
 declare delim=$'\n'
 declare line d i
+declare pngsize cpngsize totalpngs
+declare jpgsize cjpgsize totaljpgs
 
 _info() {
 	cat <<-EOF
@@ -57,7 +59,19 @@ mkdir -p "${opath}"
 [[ -d ${opath} ]] || exit 1
 [[ ${opath: -1} == '/' ]] || opath=${opath}/
 
-((${#pnglist[@]} > 0)) && { printf '%s\0' "${pnglist[@]}" | parallel -0 -j"${threads}" --bar --plus "pngquant --speed 1 -f -o ${opath}{/} {} 2>/dev/null"; }
-((${#jpglist[@]} > 0)) && { printf '%s\0' "${jpglist[@]}" | parallel -0 -j"${threads}" --bar "jpegoptim -q -o -s -m 80 -d ${opath} {} 2>/dev/null"; }
+((${#pnglist[@]} > 0)) && {
+	printf '%s\0' "${pnglist[@]}" | parallel -0 -j"${threads}" --bar --plus "pngquant --speed 1 -f -o ${opath}{/} {} 2>/dev/null"
+	pngsize=$(printf '%s\0' "${pnglist[@]}" | du -bc --files0-from=- | awk 'END{printf $1}')
+	cpngsize=$(find "${opath}" -type f -iname '*.png' -printf '%s\n' | awk '{sum+=$1}; END{printf sum}')
+	totalpngs=$(find "${opath}" -type f -iname '*.png' -printf .)
+	printf 'Saved %s for %s/%s PNGs\n' "$(numfmt --to=iec $((pngsize-cpngsize)))" "${#totalpngs}" "${#pnglist[@]}"
+}
+((${#jpglist[@]} > 0)) && {
+	printf '%s\0' "${jpglist[@]}" | parallel -0 -j"${threads}" --bar "jpegoptim -q -o -s -m 80 -d ${opath} {} 2>/dev/null"
+	jpgsize=$(printf '%s\0' "${jpglist[@]}" | du -bc --files0-from=- | awk 'END{printf $1}')
+	cjpgsize=$(find "${opath}" -type f \( -iname '*.jpg' -o -iname '*.jpeg' \) -printf '%s\n' | awk '{sum+=$1}; END{printf sum}')
+	totaljpgs=$(find "${opath}" -type f \( -iname '*.jpg' -o -iname '*.jpeg' \) -printf .)
+	printf 'Saved %s for %s/%s JPGs\n' "$(numfmt --to=iec $((jpgsize-cjpgsize)))" "${#totaljpgs}" "${#jpglist[@]}"
+}
 
 exit 0
