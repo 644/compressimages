@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # Depends on GNU parallel, pngquant, jpegoptim, and bash >= 4.0+
-# Takes files and directories from stdin, and arguments to the script
-case "${BASH_VERSION}" in ''|[123].*) printf 'Bash >= 4.0+ required' >&2; exit 1; ;; esac
+# Takes files/urls and directories from stdin, and arguments to the script
+case "${BASH_VERSION}" in ''|[123].*) printf 'Bash >= 4.0+ required\n' >&2; exit 1; ;; esac
 
 declare -a dirlist imglist pnglist jpglist depth
 declare -a hidden=(\( ! -regex '.*/\..*' \))
 declare -i threads=16
+declare -r urlreg='(https?|s?ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|].(png|jpg|jpeg)'
 declare opath="${HOME}/compressed/"
 declare delim=$'\n'
 declare line d i
@@ -32,14 +33,18 @@ while(($# > 0)); do
 		-nh) hidden=() ;;
 		-0) delim= ;;
 		-h) _info; ;;
-		*) [[ -f ${1} ]] && imglist+=("${1}"); [[ -d ${1} ]] && dirlist+=("${1}") ;;
+		*)
+			[[ -f ${1} ]] && imglist+=("${1}") ||
+			[[ -d ${1} ]] && dirlist+=("${1}") ||
+			[[ ${1} =~ ${urlreg} ]] && wget -q --show-progress --backups=1 "${BASH_REMATCH[0]}" && imglist+=("${BASH_REMATCH[0]##*/}") ;;
 	esac
 	shift
 done
 
 while [[ ! -t 0 ]] && read -r -d "${delim}" line; do
-	[[ -f ${line} ]] && imglist+=("${line}");
-	[[ -d ${line} ]] && dirlist+=("${line}");
+	[[ -f ${line} ]] && imglist+=("${line}") ||
+	[[ -d ${line} ]] && dirlist+=("${line}") ||
+	[[ ${line} =~ ${urlreg} ]] && wget -q --show-progress --backups=1 "${BASH_REMATCH[0]}" && imglist+=("${BASH_REMATCH[0]##*/}")
 done
 
 ((${#dirlist[@]} + ${#imglist[@]} > 0)) || dirlist=(./)
