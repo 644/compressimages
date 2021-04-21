@@ -76,6 +76,27 @@ for ((i=0; i<1000; i++)); do
 done
 ```
 
+# Comparison
+#### JPG
+Screenshot taken with mpv of a 4K BluRay, uncompressed (7.0MB)
+![scarface](https://user-images.githubusercontent.com/17060633/115523415-f3869b80-a284-11eb-8584-c344134fdacc.jpg)
+
+Compressed version (889KB)
+![scarface](https://user-images.githubusercontent.com/17060633/115523763-4ceeca80-a285-11eb-870b-c7b820a751dc.jpg)
+
+#### PNG
+Transparent image of the Rubik's Cube, uncompressed (79KB)
+![rubik's](https://user-images.githubusercontent.com/17060633/115523866-6f80e380-a285-11eb-9138-1a45d7a95735.png)
+
+Compressed version (24KB)
+![rubix](https://user-images.githubusercontent.com/17060633/115524047-9c34fb00-a285-11eb-905c-c443bc6c0e93.png)
+
+There are very small differences to the human eye in these examples, yet significant amounts of space was saved. Of course this example isn't 100% accurate (different test types on different images should be performed, like in: https://testimages.org/), but this should hopefully provide a rough idea as to what this script can do thanks to [pngquant](https://pngquant.org/) and [jpegoptim](https://github.com/tjko/jpegoptim).
+
+More useful links:
+https://tinypng.com/
+https://tinyjpg.com/
+
 ## Dependencies
 - parallel
 - jpegoptim
