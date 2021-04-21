@@ -1,51 +1,57 @@
-## Description
-Bash script for bulk optimizing PNG/JPG files. It uses lossy compression, with barely noticeable differences except for filesize. Similar to tinypng.com.
+## About
+Bash script for bulk optimizing PNG/JPG files, quickly and reliably (includes download function, and GUI filepicker). It uses lossy compression, with barely noticeable differences except for filesize. Similar to tinypng.com.
 
-## Installation & Usage
-Download and give file executable permissions for user
+## Install
+Download and install to `/usr/local/bin/`
 
-    wget https://raw.githubusercontent.com/644/compressimages/master/compressimages && chmod u+x compressimages
-
-Copy to $PATH
-    
-    sudo cp compressimages /usr/local/bin/
+```bash
+wget https://raw.githubusercontent.com/644/compressimages/master/compressimages
+sudo install -m 0755 compressimages /usr/local/bin/
+```
 
 Install dependencies
 
 * Ubuntu
     
-      apt install -y jpegoptim pngquant parallel
+      apt install -y jpegoptim pngquant parallel zenity
     
 * Arch Linux
 
-      pacman -Syu jpegoptim pngquant parallel
+      pacman -Syu jpegoptim pngquant parallel zenity
 
 Run it with
-
-    compressimages [options] [files] [directories]
-    -0            use NUL as delimiter for stdin rather than newline
-    -nh           don't ignore directories starting with . or ..
-    -p PATH       path for compressed images
-    -t INT        threads to use (default: 16)
-    -depth INT    limit find's maxdepth to INT
+```bash
+compressimages [options] [files] [directories]
+-0         use NUL as delimiter for stdin rather than newline
+-t INT     threads to use (default: 16)
+-p PATH    path to save compressed images (default: $HOME/compressed)
+-nh        don't ignore directories starting with . or ..
+-depth INT limit find's maxdepth to INT
+```
 
 ## Examples
     find . -type f -name '*.png' -print0 | compressimages -0 -p output/
 
-It can detect whether it's a directory or file
+It can detect whether it's a directory or file, or even a (s)ftp/http(s)/ URL
 
-    find . | compressimages -depth 2 Downloads/ someimage.png Pictures/
+    find . | compressimages -depth 2 Downloads/ someimage.png Pictures/ https://website.com/image.png
     
-Or just run `compressimages` to recursively find and optimize all PNG/JPGs in the current directory, saving them in compressed/
+Run just `compressimages .` to recursively find and optimize all PNG/JPGs in the current directory, saving them in `compressed/` by default
 
-It's a good idea to [add the script to your PATH](https://askubuntu.com/questions/97897/add-bash-script-folder-to-path/97899#97899), so you can run it from anywhere.
+You can also run `compressimages` on its own to open zenity filepicker
     
-For directories it will scan them for more images.
+For directories, it will scan them for more images.
 
-For files it will check they are PNG/JPG before continuing to optimize them.
+For files, it will check they are PNG/JPG before continuing to optimize them.
+
+For URLs, it will attempt to match http(s)/sft(p)/file links to images, download them using wget, and add the downloaded file to the queue for testing if it's a JPG/PNG image.
 
 ## Dependencies
-parallel, jpegoptim, pngquant, bash >= 4.0+
+- parallel
+- jpegoptim
+- pngquant
+- zenity (optional)
+- bash >= 4.0+
 
 ## License
 MIT
