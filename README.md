@@ -30,16 +30,32 @@ compressimages [options] [files] [directories]
 ```
 
 ## Examples
-    find . -type f -name '*.png' -print0 | compressimages -0 -p output/
+Read from stdin
+```bash
+find . -type f -name '*.png' -print0 | compressimages -0 -p output/
+```
 
 It can detect whether it's a directory or file, or even a (s)ftp/http(s) URL
+```bash
+compressimages -depth 2 Downloads/ someimage.png Pictures/ https://website.com/image.png
+```
 
-    find . | compressimages -depth 2 Downloads/ someimage.png Pictures/ https://website.com/image.png
-    
-Run just `compressimages .` to recursively find and optimize all PNG/JPGs in the current directory, saving them in `compressed/` by default
+Running
+```bash
+compressimages .`
+```
+will recursively find and optimize all PNG/JPGs in the current directory, saving them in `compressed/` by default
 
-You can also run `compressimages` on its own to open zenity filepicker
-    
+Or to open the zenity filepicker, just run
+```bash
+compressimages
+```
+
+Or to read filenames/folders/URLs from a .txt file
+```bash
+compressimages < images.txt
+```
+---
 For directories, it will scan them for more images.
 
 For files, it will check they are PNG/JPG before continuing to optimize them.
