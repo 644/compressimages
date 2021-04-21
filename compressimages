@@ -10,25 +10,35 @@ declare -i threads=16
 declare -r urlreg='(https?|s?ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|].(png|jpg|jpeg)'
 declare opath="${HOME}/compressed/"
 declare delim=$'\n'
-declare line i
-declare pngsize cpngsize totalpngs
-declare jpgsize cjpgsize totaljpgs
 
 hash -- "${depends[@]}" || { printf 'Unmet dependencies. Quitting..\n' >&2; exit 1; }
 
 _info() {
 	cat <<-EOF
 		./${0##*/} [options] [files] [directories]
-		    -0            use NUL as delimiter for stdin rather than newline
-		    -nh           don't ignore directories starting with . or ..
-		    -p PATH       path for compressed images
-		    -t INT        threads to use (default: 16)
-		    -depth INT    limit find's maxdepth to INT
+
+		-0         use NUL as delimiter for stdin rather than newline
+		-t INT     threads to use (default: 16)
+		-p PATH    path to save compressed images (default: $HOME/compressed)
+		-nh        don't ignore directories starting with . or ..
+		-depth INT limit find's maxdepth to INT
+
 	EOF
 	exit 0
 }
 
-while(($# > 0)); do
+add_imgs(){
+	if [[ -f ${1} ]]; then
+		imglist+=("${1}")
+	elif [[ -d ${1} ]]; then
+		dirlist+=("${1}")
+	elif [[ ${1} =~ ${urlreg} ]]; then
+		wget -q --show-progress --backups=1 "${BASH_REMATCH[0]}"
+		imglist+=("${BASH_REMATCH[0]##*/}") 
+	fi
+}
+
+while(($#)); do
 	case ${1} in
 		-depth) shift; depth=(-maxdepth "${1}") ;;
 		-p) shift; opath=${1} ;;
@@ -36,23 +46,20 @@ while(($# > 0)); do
 		-nh) hidden=() ;;
 		-0) delim= ;;
 		-h) _info; ;;
-		*)
-			[[ -f ${1} ]] && imglist+=("${1}") ||
-			[[ -d ${1} ]] && dirlist+=("${1}") ||
-			[[ ${1} =~ ${urlreg} ]] && wget -q --show-progress --backups=1 "${BASH_REMATCH[0]}" && imglist+=("${BASH_REMATCH[0]##*/}") ;;
+		*) add_imgs "${1}" ;;
 	esac
 	shift
 done
 
 while [[ ! -t 0 ]] && read -r -d "${delim}" line; do
-	[[ -f ${line} ]] && imglist+=("${line}") ||
-	[[ -d ${line} ]] && dirlist+=("${line}") ||
-	[[ ${line} =~ ${urlreg} ]] && wget -q --show-progress --backups=1 "${BASH_REMATCH[0]}" && imglist+=("${BASH_REMATCH[0]##*/}")
+	add_imgs "${line}"
 done
 
-((${#dirlist[@]} + ${#imglist[@]} > 0)) || dirlist=(./)
+((${#dirlist[@]} + ${#imglist[@]})) || {
+	hash zenity 2>/dev/null && mapfile -t imglist < <(zenity --file-selection --multiple --file-filter='Image Files (jpg,jpeg,png) | *.jpeg *.jpg *.png' --separator=$'\n')
+}
 
-((${#dirlist[@]} > 0)) && {
+((${#dirlist[@]})) && {
 	mapfile -t -d '' pnglist < <(find "${dirlist[@]}" "${depth[@]}" "${hidden[@]}" -type f -iname '*.png' -printf '%p\0')
 	mapfile -t -d '' jpglist < <(find "${dirlist[@]}" "${depth[@]}" "${hidden[@]}" -type f \( -iname '*.jpg' -o -iname '*.jpeg' \) -printf '%p\0')
 }
@@ -61,25 +68,28 @@ for i in "${imglist[@]}"; do
 	case ${i} in *.png) pnglist+=("${i}") ;; *.jpg|*.jpeg) jpglist+=("${i}") ;; *) continue; ;; esac
 done
 
-((${#pnglist[@]} + ${#jpglist[@]} > 0)) || exit 1
+((${#pnglist[@]} + ${#jpglist[@]})) || exit 1
 
-mkdir -p "${opath}"
+mkdir -p -- "${opath}"
 [[ -d ${opath} ]] || exit 1
 [[ ${opath: -1} == '/' ]] || opath=${opath}/
 
-((${#pnglist[@]} > 0)) && {
-	printf '%s\0' "${pnglist[@]}" | parallel -0 -j"${threads}" --bar --plus "pngquant --speed 1 -f -o ${opath}{/} {} 2>/dev/null"
-	pngsize=$(printf '%s\0' "${pnglist[@]}" | du -bc --files0-from=- | awk 'END{printf $1}')
-	cpngsize=$(find "${opath}" -type f -iname '*.png' -printf '%s\n' | awk '{sum+=$1}; END{printf sum}')
-	totalpngs=$(find "${opath}" -type f -iname '*.png' -printf .)
-	printf 'Saved %s for %s/%s PNGs\n' "$(numfmt --to=iec $((pngsize-cpngsize)) 2>/dev/null)" "${#totalpngs}" "${#pnglist[@]}"
+((${#pnglist[@]})) && {
+	printf -- '%s\0' "${pnglist[@]}" | parallel -0 -j"${threads}" --bar --plus "pngquant --speed 1 -f -o ${opath}{/} {} 2>/dev/null"
+	ucsize=$(printf -- '%s\0' "${pnglist[@]}" | du -bc --files0-from=- | awk 'END{printf $1}')
+	cmpsizecount=$(printf -- "${opath}%s\0" "${pnglist[@]##*/}" | du -bc --files0-from=- | awk 'END{printf $1":"NR-1}')
+	cmpsize=${cmpsizecount%:*}
+	cmpcount=${cmpsizecount#*:}
+	printf -- 'Saved %s for %s/%s PNGs\n' "$(numfmt --to=iec $((ucsize-cmpsize)) 2>/dev/null)" "${cmpcount}" "${#pnglist[@]}"
 }
-((${#jpglist[@]} > 0)) && {
-	printf '%s\0' "${jpglist[@]}" | parallel -0 -j"${threads}" --bar "jpegoptim -q -o -s -m 80 -d ${opath} {} 2>/dev/null"
-	jpgsize=$(printf '%s\0' "${jpglist[@]}" | du -bc --files0-from=- | awk 'END{printf $1}')
-	cjpgsize=$(find "${opath}" -type f \( -iname '*.jpg' -o -iname '*.jpeg' \) -printf '%s\n' | awk '{sum+=$1}; END{printf sum}')
-	totaljpgs=$(find "${opath}" -type f \( -iname '*.jpg' -o -iname '*.jpeg' \) -printf .)
-	printf 'Saved %s for %s/%s JPGs\n' "$(numfmt --to=iec $((jpgsize-cjpgsize)) 2>/dev/null)" "${#totaljpgs}" "${#jpglist[@]}"
+
+((${#jpglist[@]})) && {
+	printf -- '%s\0' "${jpglist[@]}" | parallel -0 -j"${threads}" --bar "jpegoptim -q -o -s -m 80 -d ${opath} {} 2>/dev/null"
+	ucsize=$(printf -- '%s\0' "${jpglist[@]}" | du -bc --files0-from=- | awk 'END{printf $1}')
+	cmpsizecount=$(printf -- "${opath}%s\0" "${jpglist[@]##*/}" | du -bc --files0-from=- | awk 'END{printf $1":"NR-1}')
+	cmpsize=${cmpsizecount%:*}
+	cmpcount=${cmpsizecount#*:}
+	printf -- 'Saved %s for %s/%s JPGs\n' "$(numfmt --to=iec $((ucsize-cmpsize)) 2>/dev/null)" "${cmpcount}" "${#jpglist[@]}"
 }
 
 exit 0
