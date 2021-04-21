@@ -62,6 +62,20 @@ For files, it will check they are PNG/JPG before continuing to optimize them.
 
 For URLs, it will attempt to match http(s)/sft(p)/file links to images, download them using wget, and add the downloaded file to the queue for testing if it's a JPG/PNG image.
 
+# Benchmark
+For the benchmark I created 1,000 unique JPG and PNG images of ~2.0MB each. The script successfully compressed all 2,000 images in under a minute, saving 1.7GB of space total.
+
+https://user-images.githubusercontent.com/17060633/115512209-a05b1b80-a279-11eb-9012-b5ead726597e.mp4
+
+Script to create the unique images
+```bash
+#!/usr/bin/env bash
+for ((i=0; i<1000; i++)); do
+	convert -size 1000x1000 xc:gray +noise gaussian "image-$i.png"
+	convert -size 4000x1000 xc:gray +noise gaussian "image-$i.jpg"
+done
+```
+
 ## Dependencies
 - parallel
 - jpegoptim
