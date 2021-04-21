@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Depends on GNU parallel, pngquant, jpegoptim, and bash >= 4.0+
+# Depends on GNU parallel, pngquant, jpegoptim, zenity (optional), and bash >= 4.0+
 # Takes files/urls and directories from stdin, and arguments to the script
 case "${BASH_VERSION}" in ''|[123].*) printf 'Bash >= 4.0+ required\n' >&2; exit 1; ;; esac
 
@@ -19,7 +19,7 @@ _info() {
 
 		-0         use NUL as delimiter for stdin rather than newline
 		-t INT     threads to use (default: 16)
-		-p PATH    path to save compressed images (default: $HOME/compressed)
+		-p PATH    path to save compressed images (default: ${HOME}/compressed)
 		-nh        don't ignore directories starting with . or ..
 		-depth INT limit find's maxdepth to INT
 
