@@ -42,7 +42,7 @@ compressimages -depth 2 Downloads/ someimage.png Pictures/ https://website.com/i
 
 Running
 ```bash
-compressimages .`
+compressimages .
 ```
 will recursively find and optimize all PNG/JPGs in the current directory, saving them in `compressed/` by default
 
