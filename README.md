@@ -32,7 +32,7 @@ compressimages [options] [files] [directories]
 ## Examples
     find . -type f -name '*.png' -print0 | compressimages -0 -p output/
 
-It can detect whether it's a directory or file, or even a (s)ftp/http(s)/ URL
+It can detect whether it's a directory or file, or even a (s)ftp/http(s) URL
 
     find . | compressimages -depth 2 Downloads/ someimage.png Pictures/ https://website.com/image.png
     
