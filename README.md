@@ -13,11 +13,11 @@ Install dependencies
 
 * Ubuntu
     
-      apt install -y jpegoptim pngquant parallel zenity
+      apt install -y jpegoptim pngquant parallel zenity imagemagick
     
 * Arch Linux
 
-      pacman -Syu jpegoptim pngquant parallel zenity
+      pacman -Syu jpegoptim pngquant parallel zenity imagemagick
 
 Run it with
 ```bash
@@ -27,6 +27,7 @@ compressimages [options] [files] [directories]
 -p PATH    path to save compressed images (default: $HOME/compressed)
 -nh        don't ignore directories starting with . or ..
 -depth INT limit find's maxdepth to INT
+-cc        convert images to JPG and PNG, compress, and keep the smallest file
 ```
 
 ## Examples
@@ -46,12 +47,17 @@ compressimages .
 ```
 will recursively find and optimize all PNG/JPGs in the current directory, saving them in `compressed/` by default
 
-Or to open the zenity filepicker, just run
+To open the zenity filepicker, just run
 ```bash
 compressimages
 ```
 
-Or to read filenames/folders/URLs from a .txt file
+To bulk convert all images (including webp,svg,etc) to both JPG and PNG, compress them, and keep the smallest file
+```bash
+compressimages -cc
+```
+
+To read filenames/folders/URLs from a .txt file
 ```bash
 compressimages < images.txt
 ```
