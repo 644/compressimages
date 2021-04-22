@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Depends on GNU parallel, pngquant, jpegoptim, and bash >= 4.0+
+# Depends on GNU parallel, pngquant, jpegoptim, mogrify, and bash >= 4.0+
 # Takes files/urls and directories from stdin, and arguments to the script
 case "${BASH_VERSION}" in ''|[123].*) printf 'Bash >= 4.0+ required\n' >&2; exit 1; ;; esac
 
 declare -a dirlist imglist pnglist jpglist depth
 declare -a hidden=(\( ! -regex '.*/\..*' -a ! -name '*.gif' \))
-declare -a depends=(parallel pngquant jpegoptim wget numfmt)
+declare -a depends=(parallel pngquant jpegoptim wget numfmt mogrify)
 declare -i threads=16
 declare -r urlreg='(https?|s?ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|].(png|jpg|jpeg)'
 declare opath="${HOME}/compressed/"
